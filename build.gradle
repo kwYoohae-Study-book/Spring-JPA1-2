@@ -26,6 +26,9 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // devtools 추가
+    implementation 'org.springframework.boot:spring-boot-devtools'
 }
 
 tasks.named('test') {
