@@ -16,7 +16,9 @@ public class ItemRepository {
         if (item.getId() == null) { // 처음에 저장할떄는 없음 (새로운 객체)
             em.persist(item);
         } else {
-            em.merge(item);
+            em.merge(item); // 병합방법, 이보다, 변경감지를 사용하는것이 더 좋음
+            // 새롭게 변경된 코드를 아예 새롭게 변경하는 방법임
+            // 모든 속성이 변경되므로, 위험함, 변경감지는 변경된 값만 변경됨
         }
     }
 
