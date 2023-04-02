@@ -10,6 +10,8 @@ import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryDto;
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderSimpleApiController {
 
     private final OrderRepository orderRepository;
+    private final OrderSimpleQueryRepository orderSimpleQueryRepository;
 
     // 1. 양방향으로 계속 접근해서 안됨 JsonIgnore
     // 2. Lazy 이므로 Proxy로 생성이 되기 때문에 Jackson이 가져올 수 없음
@@ -61,6 +64,14 @@ public class OrderSimpleApiController {
             .collect(Collectors.toList());
     }
 
+    // 컬럼이 적어져 좀더 성능이 최적화 되지만, 재사용성이 현격히 적어짐
+    // 또한, 코드도 지저분함 -> 새로운 성능 최적화용, Repository를 만들어 해결
+    // Reposiotry는 가능한 순수한 엔티티를 다루는데 사용
+    @GetMapping("/api/v4/simple-orders")
+    public List<OrderSimpleQueryDto> orderV4() {
+        return orderSimpleQueryRepository.findOrderDtos();
+    }
+
     @Data
     static class SimpleOrderDto {
         private Long orderId;
@@ -77,5 +88,6 @@ public class OrderSimpleApiController {
             address = order.getDelivery().getAddress(); // LAZY 초기화
         }
     }
+
 
 }
