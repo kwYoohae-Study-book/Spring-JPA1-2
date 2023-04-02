@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 import jpabook.jpashop.domain.Address;
 import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderStatus;
@@ -48,6 +49,16 @@ public class OrderSimpleApiController {
             .stream()
             .map(SimpleOrderDto::new)
             .collect(toList());
+    }
+
+    // fetch join을 통해서 기존 5개에서 쿼리가 1개로 줄어듬
+    @GetMapping("/api/v3/simple-orders")
+    public List<SimpleOrderDto> orderV3() {
+        final List<Order> orders = orderRepository.findALlWithMemberDelivery();
+
+        return orders.stream()
+            .map(SimpleOrderDto::new)
+            .collect(Collectors.toList());
     }
 
     @Data
