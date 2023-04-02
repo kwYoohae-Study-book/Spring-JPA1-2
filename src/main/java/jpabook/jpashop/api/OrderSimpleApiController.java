@@ -1,9 +1,15 @@
 package jpabook.jpashop.api;
 
+import static java.util.stream.Collectors.toList;
+
+import java.time.LocalDateTime;
 import java.util.List;
+import jpabook.jpashop.domain.Address;
 import jpabook.jpashop.domain.Order;
+import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +37,34 @@ public class OrderSimpleApiController {
             order.getDelivery().getAddress();
         }
         return all;
+    }
+
+    // Lazy loading으로 많은 호출이 일어남, Order Delivery, Member총 3가지 Table을 사용
+    // 즉, N+1의 문제를 일으킴
+    // 1 + 회원 N + Delivery N으로 많으 쿼리가 이용됨 -> fetch join으로 해결가능
+    @GetMapping("/api/v2/simple-orders")
+    public List<SimpleOrderDto> orderV2() {
+        return orderRepository.findAllByString(new OrderSearch())
+            .stream()
+            .map(SimpleOrderDto::new)
+            .collect(toList());
+    }
+
+    @Data
+    static class SimpleOrderDto {
+        private Long orderId;
+        private String name;
+        private LocalDateTime orderDate;
+        private OrderStatus orderStatus;
+        private Address address;
+
+        public SimpleOrderDto(Order order) {
+            orderId = order.getId();
+            name = order.getMember().getName(); // LAZY 초기화
+            orderDate = order.getOrderDate();
+            orderStatus = order.getStatus();
+            address = order.getDelivery().getAddress(); // LAZY 초기화
+        }
     }
 
 }
