@@ -127,4 +127,16 @@ public class OrderRepository {
                     + "join o.delivery d", OrderSimpleQueryDto.class
             ).getResultList();
     }
+
+    // 페치 조인으로 SQL이 1번만 실행된다는 장점
+    // 페이징이 불가능하다는 단점
+    public List<Order> findAllWithItem() {
+        return em.createQuery(
+            "SELECT distinct o FROM Order o" // distinct는 2가지 기능을한다는 것을 명심
+                + " JOIN FETCH o.member m"
+                + " JOIN FETCH o.delivery d"
+                + " JOIN FETCH o.orderItems oi"
+                + " JOIN FETCH oi.item i", Order.class
+        ).getResultList();
+    }
 }
