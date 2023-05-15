@@ -81,9 +81,7 @@ public class OrderRepository {
     }
 
     /**
-     * 방법 2
-     * JPA Criteria
-     * 유지보수성이 없음, 어떤 쿼리를 사용하는지 바로 안보임
+     * 방법 2 JPA Criteria 유지보수성이 없음, 어떤 쿼리를 사용하는지 바로 안보임
      */
     public List<Order> findAllByCriteria(OrderSearch orderSearch) {
         final CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -122,9 +120,9 @@ public class OrderRepository {
     public List<OrderSimpleQueryDto> findOrderDtos() {
         return em.createQuery
             ("select new jpabook.jpashop.repository.OrderSimpleQueryDto(o.id, m.name, o.orderDate, o.status, d.address) "
-                    + "from Order o "
-            + "join o.member m "
-                    + "join o.delivery d", OrderSimpleQueryDto.class
+                + "from Order o "
+                + "join o.member m "
+                + "join o.delivery d", OrderSimpleQueryDto.class
             ).getResultList();
     }
 
@@ -138,5 +136,15 @@ public class OrderRepository {
                 + " JOIN FETCH o.orderItems oi"
                 + " JOIN FETCH oi.item i", Order.class
         ).getResultList();
+    }
+
+    public List<Order> findALlWithMemberDelivery(final int offset, final int limit) {
+        return em.createQuery(
+                "select o from Order o "
+                    + "join fetch o.member m "
+                    + "join fetch o.delivery d", Order.class
+            ).setFirstResult(offset)
+            .setMaxResults(limit)
+            .getResultList();
     }
 }

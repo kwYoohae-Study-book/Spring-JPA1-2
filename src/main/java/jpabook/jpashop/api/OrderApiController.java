@@ -12,6 +12,7 @@ import jpabook.jpashop.repository.OrderSearch;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -58,6 +59,24 @@ public class OrderApiController {
         return result;
     }
 
+    // 그냥 가져오면, OrderItems가 fetch join안되어 있어 실행마다 쿼리발생
+    // ToOne관계 페치 조인 이후, 지연로딩, batchsize설정
+    @GetMapping("/api/v3.1/orders")
+    public List<OrderDto> orderV3_page(
+        @RequestParam(value = "offset", defaultValue = "0") int offset,
+        @RequestParam(value = "limit", defaultValue = "100") int limit) {
+        List<Order> orders = orderRepository.findALlWithMemberDelivery(offset, limit);
+
+        for (Order order : orders) {
+            System.out.println("order ref= " + order + " id=" + order.getId());
+        }
+
+        final List<OrderDto> result = orders.stream()
+            .map(o -> new OrderDto(o))
+            .collect(Collectors.toList());
+
+        return result;
+    }
 
     @Getter
     static class OrderDto {
