@@ -4,19 +4,17 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import jpabook.jpashop.domain.Address;
 import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderItem;
-import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
 import jpabook.jpashop.repository.order.query.OrderFlatDto;
 import jpabook.jpashop.repository.order.query.OrderItemQueryDto;
 import jpabook.jpashop.repository.order.query.OrderQueryDto;
 import jpabook.jpashop.repository.order.query.OrderQueryRepository;
-import lombok.Getter;
+import jpabook.jpashop.service.query.OrderDto;
+import jpabook.jpashop.service.query.OrderQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -52,19 +50,12 @@ public class OrderApiController {
         return result;
     }
 
+    private final OrderQueryService orderQueryService;
+
     @GetMapping("/api/v3/orders")
     public List<OrderDto> orderV3() {
-        List<Order> orders = orderRepository.findAllWithItem();
 
-        for (Order order : orders) {
-            System.out.println("order ref= " + order + " id=" + order.getId());
-        }
-
-        final List<OrderDto> result = orders.stream()
-            .map(o -> new OrderDto(o))
-            .collect(toList());
-
-        return result;
+        return orderQueryService.orderV3();
     }
 
     // 그냥 가져오면, OrderItems가 fetch join안되어 있어 실행마다 쿼리발생
@@ -115,41 +106,41 @@ public class OrderApiController {
 
     }
 
-    @Getter
-    static class OrderDto {
-
-        private Long orderId;
-        private String name;
-        private LocalDateTime orderDate;
-        private OrderStatus orderStatus;
-        private Address address;
-        private List<OrderItemDto> orderItems; // DTO안에 Entity가 있으면 안됨 -> 외부에 노출되면안됨
-
-        public OrderDto(Order order) {
-            orderId = order.getId();
-            name = order.getMember().getName();
-            orderDate = order.getOrderDate();
-            orderStatus = order.getStatus();
-            address = order.getDelivery().getAddress();
-//            order.getOrderItems().stream().forEach(o -> o.getItem().getName()); // 프록시 초기화
-//            orderItems = order.getOrderItems();
-            orderItems = order.getOrderItems().stream()
-                .map(orderItem -> new OrderItemDto(orderItem))
-                .collect(toList());
-        }
-    }
-
-    @Getter
-    static class OrderItemDto {
-
-        private String itemName; // 상품명
-        private int orderPrice; // 주문 가격
-        private int count; // 주문 수량
-
-        public OrderItemDto(final OrderItem orderItem) {
-            itemName = orderItem.getItem().getName();
-            orderPrice = orderItem.getOrderPrice();
-            count = orderItem.getCount();
-        }
-    }
+//    @Getter
+//    static class OrderDto {
+//
+//        private Long orderId;
+//        private String name;
+//        private LocalDateTime orderDate;
+//        private OrderStatus orderStatus;
+//        private Address address;
+//        private List<OrderItemDto> orderItems; // DTO안에 Entity가 있으면 안됨 -> 외부에 노출되면안됨
+//
+//        public OrderDto(Order order) {
+//            orderId = order.getId();
+//            name = order.getMember().getName();
+//            orderDate = order.getOrderDate();
+//            orderStatus = order.getStatus();
+//            address = order.getDelivery().getAddress();
+////            order.getOrderItems().stream().forEach(o -> o.getItem().getName()); // 프록시 초기화
+////            orderItems = order.getOrderItems();
+//            orderItems = order.getOrderItems().stream()
+//                .map(orderItem -> new OrderItemDto(orderItem))
+//                .collect(toList());
+//        }
+//    }
+//
+//    @Getter
+//    static class OrderItemDto {
+//
+//        private String itemName; // 상품명
+//        private int orderPrice; // 주문 가격
+//        private int count; // 주문 수량
+//
+//        public OrderItemDto(final OrderItem orderItem) {
+//            itemName = orderItem.getItem().getName();
+//            orderPrice = orderItem.getOrderPrice();
+//            count = orderItem.getCount();
+//        }
+//    }
 }
