@@ -81,9 +81,15 @@ public class OrderApiController {
         return result;
     }
 
+    // N + 1 발생
     @GetMapping("/api/v4/orders")
     public List<OrderQueryDto> ordersV4() {
         return orderQueryRepository.findOrderQueryDtos();
+    }
+
+    @GetMapping("/api/v5/orders")
+    public List<OrderQueryDto> orderV5() {
+        return orderQueryRepository.findAllByDto_optimization();
     }
 
     @Getter
