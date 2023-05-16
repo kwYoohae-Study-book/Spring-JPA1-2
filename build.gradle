@@ -1,12 +1,24 @@
+buildscript {
+    ext {
+        queryDslVersion = "5.0.0"
+    }
+}
+
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '2.7.9'
     id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+
+    // querydsl
+    id 'com.ewerk.gradle.plugins.querydsl' version '1.0.10'
 }
 
 group = 'jpabook'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
+
+ext["hibernate.version"] = "5.6.5.Final"
 
 configurations {
     compileOnly {
@@ -38,8 +50,36 @@ dependencies {
 
     // hibernate5Module
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-hibernate5'
+
+
+    // querydsl
+    implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
+    implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
+
+
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+// querydsl start
+def querydslDir = "$buildDir/generated/querydsl"
+
+querydsl {
+    jpa = true
+    querydslSourcesDir = querydslDir
+}
+sourceSets {
+    main.java.srcDir querydslDir
+}
+compileQuerydsl {
+    options.annotationProcessorPath = configurations.querydsl
+}
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+    querydsl.extendsFrom compileClasspath
+}
+// querydsl end
